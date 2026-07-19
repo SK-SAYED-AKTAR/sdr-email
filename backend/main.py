@@ -1,16 +1,28 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+from app.core.config import settings
+from app.db.bootstrap import ensure_database_exists
+from app.routers import auth, smtp
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ensure_database_exists()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[settings.FRONTEND_ORIGIN],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-@app.get("/api/hello")
-def hello():
-    return {"message": "Hello from FastAPI"}
+app.include_router(smtp.router)
+app.include_router(auth.router)

@@ -61,3 +61,13 @@ export function fetchProspects(params: ProspectListParams): Promise<ProspectList
 
   return apiFetch<ProspectListResponse>(`/api/prospects?${query.toString()}`);
 }
+
+export function updateProspectOutreach(
+  id: string,
+  payload: { subject: string; email_body: string }
+): Promise<Prospect> {
+  return apiFetch<Prospect>(`/api/prospects/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}

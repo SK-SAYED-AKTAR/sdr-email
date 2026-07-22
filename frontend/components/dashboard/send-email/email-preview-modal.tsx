@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { ExternalLink, Sparkles } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, ExternalLink, Sparkles } from "lucide-react";
 
 import {
   Dialog,
@@ -13,23 +14,67 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { LoadingButton } from "@/components/loading-button";
+import { InlineSavedField } from "@/components/inline-saved-field";
 import { StatusBadge } from "@/components/dashboard/send-email/status-badge";
+import { ApiError } from "@/lib/api";
 import { formatDateTime, getDomain } from "@/lib/format";
-import type { Prospect } from "@/lib/prospects";
+import { updateProspectOutreach, type Prospect } from "@/lib/prospects";
+
+type EditableField = "subject" | "email_body";
 
 export function EmailPreviewModal({
   prospect,
   open,
   onOpenChange,
+  onUpdated,
 }: {
   prospect: Prospect | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUpdated?: () => void;
 }) {
   const [regenerating, setRegenerating] = useState(false);
+  const [subject, setSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [savedField, setSavedField] = useState<EditableField | null>(null);
+
+  useEffect(() => {
+    setSubject(prospect?.subject ?? "");
+    setEmailBody(prospect?.email_body ?? "");
+  }, [prospect?.id, open]);
 
   if (!prospect) return null;
+
+  const hasEmail = !!prospect.email_body;
+
+  async function commitField(field: EditableField, original: string) {
+    if (!prospect) return;
+    const nextSubject = subject.trim();
+    const nextBody = emailBody.trim();
+    const changed = field === "subject" ? nextSubject !== original.trim() : nextBody !== original.trim();
+    if (!changed) return;
+
+    if (!nextSubject || !nextBody) {
+      toast.error(field === "subject" ? "Subject can't be empty." : "Email body can't be empty.");
+      return;
+    }
+
+    try {
+      const updated = await updateProspectOutreach(prospect.id, {
+        subject: nextSubject,
+        email_body: nextBody,
+      });
+      setSubject(updated.subject ?? "");
+      setEmailBody(updated.email_body ?? "");
+      onUpdated?.();
+      setSavedField(field);
+      setTimeout(() => setSavedField((f) => (f === field ? null : f)), 1500);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Couldn't save your edit. Please try again.");
+    }
+  }
 
   function handleRegenerate() {
     setRegenerating(true);
@@ -39,14 +84,35 @@ export function EmailPreviewModal({
     }, 600);
   }
 
-  const hasEmail = !!prospect.email_body;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[85vh] w-full flex-col gap-0 p-0 sm:max-w-2xl">
         <DialogHeader className="gap-1 border-b p-5">
-          <div className="flex items-start justify-between gap-3 pr-6">
-            <DialogTitle className="text-lg">{prospect.subject || "No subject yet"}</DialogTitle>
+          <DialogTitle className="sr-only">{subject || "Email preview"}</DialogTitle>
+          <div className="flex items-center justify-between gap-3 pr-6">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                onBlur={() => commitField("subject", prospect.subject ?? "")}
+                disabled={!hasEmail}
+                placeholder="Subject"
+                aria-label="Email subject"
+                className="w-full min-w-0 rounded-md border border-transparent bg-transparent px-2 -mx-2 py-0.5 font-heading text-lg font-medium text-foreground outline-none transition-colors hover:bg-muted/50 focus:border-input focus:bg-background focus:ring-3 focus:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent"
+              />
+              <AnimatePresence>
+                {savedField === "subject" && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex shrink-0 items-center gap-1 text-xs text-success"
+                  >
+                    <Check className="size-3" /> Saved
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
             <StatusBadge status={prospect.status} />
           </div>
           <DialogDescription className="sr-only">
@@ -83,9 +149,16 @@ export function EmailPreviewModal({
 
         <div className="overflow-y-auto px-5 py-6">
           {hasEmail ? (
-            <div className="space-y-4 text-[0.925rem] leading-relaxed whitespace-pre-wrap text-foreground">
-              {prospect.email_body}
-            </div>
+            <InlineSavedField label="Email Body" saved={savedField === "email_body"}>
+              <Textarea
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                onBlur={() => commitField("email_body", prospect.email_body ?? "")}
+                rows={14}
+                aria-label="Email body"
+                className="text-[0.925rem] leading-relaxed"
+              />
+            </InlineSavedField>
           ) : prospect.status === "FAILED" ? (
             <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-muted-foreground">
               <p className="font-medium text-foreground">Generation failed</p>

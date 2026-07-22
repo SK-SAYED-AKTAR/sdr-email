@@ -159,6 +159,7 @@ export default function SendEmailPage() {
         onOpenChange={(open) => {
           if (!open) setPreviewProspect(null);
         }}
+        onUpdated={refetch}
       />
 
       <BulkActionBar count={selected.size} onClear={() => setSelected(new Set())} />

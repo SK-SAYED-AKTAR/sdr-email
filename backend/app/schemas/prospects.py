@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.prospect import ProspectStatus
 
@@ -60,3 +60,8 @@ class ProspectListOut(BaseModel):
     page: int
     limit: int
     total_pages: int
+
+
+class ProspectOutreachUpdate(BaseModel):
+    subject: str = Field(min_length=1, max_length=500)
+    email_body: str = Field(min_length=1)

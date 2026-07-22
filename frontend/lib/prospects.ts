@@ -36,6 +36,13 @@ export type ProspectListResponse = {
   total_pages: number;
 };
 
+export const IN_PROGRESS_STATUSES: ProspectStatus[] = [
+  "PENDING",
+  "RESEARCHING",
+  "ANALYZING_OPPORTUNITY",
+  "GENERATING_EMAIL",
+];
+
 export type StatusFilter = "all" | "completed" | "generating" | "failed";
 export type SortField = "created_at" | "client" | "company" | "status";
 export type SortOrder = "asc" | "desc";
@@ -70,4 +77,20 @@ export function updateProspectOutreach(
     method: "PATCH",
     body: JSON.stringify(payload),
   });
+}
+
+export type BulkRegenerateResponse = {
+  accepted: string[];
+  skipped: string[];
+};
+
+export function bulkRegenerateProspects(prospectIds: string[]): Promise<BulkRegenerateResponse> {
+  return apiFetch<BulkRegenerateResponse>("/api/prospects/bulk-regenerate", {
+    method: "POST",
+    body: JSON.stringify({ prospect_ids: prospectIds }),
+  });
+}
+
+export function regenerateProspect(id: string): Promise<BulkRegenerateResponse> {
+  return bulkRegenerateProspects([id]);
 }

@@ -65,3 +65,12 @@ class ProspectListOut(BaseModel):
 class ProspectOutreachUpdate(BaseModel):
     subject: str = Field(min_length=1, max_length=500)
     email_body: str = Field(min_length=1)
+
+
+class BulkRegenerateRequest(BaseModel):
+    prospect_ids: list[uuid.UUID] = Field(min_length=1, max_length=100)
+
+
+class BulkRegenerateResponse(BaseModel):
+    accepted: list[uuid.UUID]
+    skipped: list[uuid.UUID]

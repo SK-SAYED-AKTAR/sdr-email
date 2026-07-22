@@ -20,7 +20,7 @@ import { InlineSavedField } from "@/components/inline-saved-field";
 import { StatusBadge } from "@/components/dashboard/send-email/status-badge";
 import { ApiError } from "@/lib/api";
 import { formatDateTime, getDomain } from "@/lib/format";
-import { updateProspectOutreach, type Prospect } from "@/lib/prospects";
+import { IN_PROGRESS_STATUSES, regenerateProspect, updateProspectOutreach, type Prospect } from "@/lib/prospects";
 
 type EditableField = "subject" | "email_body";
 
@@ -48,6 +48,7 @@ export function EmailPreviewModal({
   if (!prospect) return null;
 
   const hasEmail = !!prospect.email_body;
+  const isInProgress = IN_PROGRESS_STATUSES.includes(prospect.status);
 
   async function commitField(field: EditableField, original: string) {
     if (!prospect) return;
@@ -76,12 +77,23 @@ export function EmailPreviewModal({
     }
   }
 
-  function handleRegenerate() {
+  async function handleRegenerate() {
+    if (!prospect) return;
     setRegenerating(true);
-    setTimeout(() => {
+    try {
+      const { accepted } = await regenerateProspect(prospect.id);
+      if (accepted.length > 0) {
+        toast.success("Regenerating this email...");
+        onUpdated?.();
+        onOpenChange(false);
+      } else {
+        toast.error("This email is already generating.");
+      }
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Couldn't start regeneration. Please try again.");
+    } finally {
       setRegenerating(false);
-      toast("Coming soon");
-    }, 600);
+    }
   }
 
   return (
@@ -95,7 +107,7 @@ export function EmailPreviewModal({
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 onBlur={() => commitField("subject", prospect.subject ?? "")}
-                disabled={!hasEmail}
+                disabled={!hasEmail || isInProgress}
                 placeholder="Subject"
                 aria-label="Email subject"
                 className="w-full min-w-0 rounded-md border border-transparent bg-transparent px-2 -mx-2 py-0.5 font-heading text-lg font-medium text-foreground outline-none transition-colors hover:bg-muted/50 focus:border-input focus:bg-background focus:ring-3 focus:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent"
@@ -154,6 +166,7 @@ export function EmailPreviewModal({
                 value={emailBody}
                 onChange={(e) => setEmailBody(e.target.value)}
                 onBlur={() => commitField("email_body", prospect.email_body ?? "")}
+                disabled={isInProgress}
                 rows={14}
                 aria-label="Email body"
                 className="text-[0.925rem] leading-relaxed"
@@ -176,7 +189,7 @@ export function EmailPreviewModal({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
-          <LoadingButton loading={regenerating} disabled={!hasEmail} onClick={handleRegenerate}>
+          <LoadingButton loading={regenerating} disabled={!hasEmail || isInProgress} onClick={handleRegenerate}>
             Regenerate Email
           </LoadingButton>
         </DialogFooter>

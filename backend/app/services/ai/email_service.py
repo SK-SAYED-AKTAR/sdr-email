@@ -23,11 +23,13 @@ async def generate_outreach(
     seller_knowledge: SellerIntelligence,
     prospect_intelligence: dict,
     business_opportunity: dict,
+    qa_feedback: str | None = None,
 ) -> dict:
-    """Writes the final cold email. Never decides what to sell — the business
+    """Writes a cold email draft. Never decides what to sell — the business
     problem, capability, and angle already come from the Business Opportunity
-    Analysis stage. Single responsibility: communication quality only. Returns
-    a {data, meta} envelope ready to store on Prospect.outreach."""
+    Analysis stage. Single responsibility: communication quality only. This is
+    a draft, not the final email — it still passes through Sales QA and the
+    Copy Editor before being stored. Returns a {data, meta} envelope."""
     client = get_openai_client()
 
     input_payload = {
@@ -41,6 +43,8 @@ async def generate_outreach(
         "prospect_intelligence": prospect_intelligence,
         "business_opportunity": business_opportunity,
     }
+    if qa_feedback:
+        input_payload["sales_qa_feedback_on_previous_draft"] = qa_feedback
 
     response = await client.responses.parse(
         model=MODEL_NAME,

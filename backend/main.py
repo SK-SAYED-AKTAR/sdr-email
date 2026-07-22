@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.db.bootstrap import ensure_database_exists
-from app.routers import auth, csv, seller_knowledge, smtp
+from app.routers import auth, csv, prospects, seller_knowledge, smtp
 
 
 @asynccontextmanager
@@ -28,3 +28,4 @@ app.include_router(smtp.router)
 app.include_router(auth.router)
 app.include_router(csv.router)
 app.include_router(seller_knowledge.router)
+app.include_router(prospects.router)

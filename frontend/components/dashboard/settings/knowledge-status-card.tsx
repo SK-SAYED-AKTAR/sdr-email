@@ -113,7 +113,7 @@ export function KnowledgeStatusCard({
           )}
 
           <LoadingButton size="lg" className="w-full" loading={starting} disabled={generating} onClick={handleGenerate}>
-            Generate Company Knowledge
+            Train AI on YOur Company Data
           </LoadingButton>
         </CardContent>
       </Card>

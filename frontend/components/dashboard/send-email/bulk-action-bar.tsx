@@ -1,20 +1,50 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { RefreshCw, Send, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/loading-button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ApiError } from "@/lib/api";
+import { bulkRegenerateProspects } from "@/lib/prospects";
 
 export function BulkActionBar({
-  count,
+  selectedIds,
   onClear,
+  onRegenerated,
 }: {
-  count: number;
+  selectedIds: string[];
   onClear: () => void;
+  onRegenerated?: () => void;
 }) {
+  const [regenerating, setRegenerating] = useState(false);
+  const count = selectedIds.length;
+
+  async function handleRegenerate() {
+    setRegenerating(true);
+    try {
+      const { accepted, skipped } = await bulkRegenerateProspects(selectedIds);
+      if (accepted.length > 0) {
+        toast.success(
+          skipped.length > 0
+            ? `Regenerating ${accepted.length} email${accepted.length === 1 ? "" : "s"} — ${skipped.length} already in progress.`
+            : `Regenerating ${accepted.length} email${accepted.length === 1 ? "" : "s"}...`
+        );
+        onRegenerated?.();
+        onClear();
+      } else {
+        toast.error("Those emails are already generating.");
+      }
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Couldn't start regeneration. Please try again.");
+    } finally {
+      setRegenerating(false);
+    }
+  }
+
   return (
     <AnimatePresence>
       {count > 0 && (
@@ -38,8 +68,17 @@ export function BulkActionBar({
               {count} email{count === 1 ? "" : "s"} selected
             </span>
             <div className="h-4 w-px bg-background/20" />
-            <ComingSoonButton icon={<RefreshCw />} label={count > 1 ? "Bulk Regenerate" : "Regenerate Emails"} />
-            <ComingSoonButton icon={<Send />} label={count > 1 ? "Bulk Send" : "Send Emails"} />
+            <LoadingButton
+              size="sm"
+              variant="secondary"
+              className="bg-background/10 text-background hover:bg-background/20"
+              loading={regenerating}
+              onClick={handleRegenerate}
+            >
+              <RefreshCw />
+              {count > 1 ? "Bulk Regenerate" : "Regenerate Email"}
+            </LoadingButton>
+            <ComingSoonButton icon={<Send />} label={count > 1 ? "Bulk Send" : "Send Email"} />
           </div>
         </motion.div>
       )}

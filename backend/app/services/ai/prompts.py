@@ -7,9 +7,11 @@ PROMPTS_DIR = Path(__file__).resolve().parents[3] / "prompts"
 # stored records stay traceable to the prompt that produced them.
 PROMPT_VERSIONS = {
     "research_agent": "v2",
-    "business_opportunity_agent": "v1",
-    "email_agent": "v3",
+    "business_opportunity_agent": "v2",
+    "email_agent": "v7",
     "seller_intelligence": "v2",
+    "sales_qa_agent": "v1",
+    "copy_editor_agent": "v1",
 }
 
 

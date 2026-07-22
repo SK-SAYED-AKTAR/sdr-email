@@ -3,16 +3,33 @@ import uuid
 from datetime import datetime, timezone
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import security
 from app.db.session import get_db
 from app.models.prospect import Prospect, ProspectStatus
-from app.schemas.prospects import ProspectListItemOut, ProspectListOut, ProspectOutreachUpdate
+from app.schemas.prospects import (
+    BulkRegenerateRequest,
+    BulkRegenerateResponse,
+    ProspectListItemOut,
+    ProspectListOut,
+    ProspectOutreachUpdate,
+)
+from app.services import pipeline_service
 
 router = APIRouter(prefix="/api/prospects", tags=["prospects"])
+
+# Statuses where a pipeline run is already in flight for this prospect -- a
+# regenerate request for a row in one of these is skipped rather than
+# started twice, since two concurrent runs would race writing the same row.
+IN_PROGRESS_STATUSES = {
+    ProspectStatus.PENDING,
+    ProspectStatus.RESEARCHING,
+    ProspectStatus.ANALYZING_OPPORTUNITY,
+    ProspectStatus.GENERATING_EMAIL,
+}
 
 SORT_COLUMNS = {
     "created_at": Prospect.created_at,
@@ -150,3 +167,40 @@ async def update_prospect_outreach(
     await db.commit()
     await db.refresh(prospect)
     return _to_item(prospect)
+
+
+@router.post("/bulk-regenerate", response_model=BulkRegenerateResponse)
+async def bulk_regenerate_prospects(
+    payload: BulkRegenerateRequest,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> BulkRegenerateResponse:
+    """Backs all three Regenerate Email entry points in the UI (bulk
+    selection, a single selected row, and the preview modal) -- each just
+    calls this with a list of one or more ids."""
+    user = await security.get_current_user(request, db)
+
+    result = await db.execute(
+        select(Prospect).where(Prospect.id.in_(payload.prospect_ids), Prospect.user_id == user.id)
+    )
+    prospects = result.scalars().all()
+    if len(prospects) != len(set(payload.prospect_ids)):
+        raise HTTPException(status_code=404, detail="One or more emails were not found.")
+
+    accepted: list[uuid.UUID] = []
+    skipped: list[uuid.UUID] = []
+    for prospect in prospects:
+        if prospect.status in IN_PROGRESS_STATUSES:
+            skipped.append(prospect.id)
+            continue
+        prospect.status = ProspectStatus.GENERATING_EMAIL
+        prospect.failure_reason = None
+        accepted.append(prospect.id)
+
+    await db.commit()
+
+    for prospect_id in accepted:
+        background_tasks.add_task(pipeline_service.regenerate_prospect_email, prospect_id)
+
+    return BulkRegenerateResponse(accepted=accepted, skipped=skipped)

@@ -162,7 +162,11 @@ export default function SendEmailPage() {
         onUpdated={refetch}
       />
 
-      <BulkActionBar count={selected.size} onClear={() => setSelected(new Set())} />
+      <BulkActionBar
+        selectedIds={Array.from(selected)}
+        onClear={() => setSelected(new Set())}
+        onRegenerated={refetch}
+      />
     </ContentContainer>
   );
 }

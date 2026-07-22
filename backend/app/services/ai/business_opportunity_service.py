@@ -12,16 +12,14 @@ PROMPT_NAME = "business_opportunity_agent"
 
 
 class BusinessOpportunityAnalysis(BaseModel):
-    overall_fit_score: int = Field(ge=0, le=100)
-    primary_business_problem: str
-    why_this_problem_exists: str
+    business_goal: str
+    primary_problem: str
+    supporting_evidence: str
     business_impact: str
-    best_product_capability: str
-    why_that_capability_matches: str
-    recommended_sales_angle: str
+    recommended_capability: str
+    expected_outcome: str
+    recommended_conversation_angle: str
     recommended_cta: str
-    urgency_reason: str
-    objection_risk: str
     confidence: float = Field(ge=0, le=1)
 
 

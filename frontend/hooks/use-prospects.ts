@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import {
   fetchProspects,
-  type Prospect,
+  IN_PROGRESS_STATUSES,
   type ProspectListResponse,
   type SortField,
   type SortOrder,
@@ -12,12 +12,6 @@ import {
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 const LIMIT = 20;
-const IN_PROGRESS: Prospect["status"][] = [
-  "PENDING",
-  "RESEARCHING",
-  "ANALYZING_OPPORTUNITY",
-  "GENERATING_EMAIL",
-];
 
 export function useProspects() {
   const [page, setPage] = useState(1);
@@ -57,7 +51,7 @@ export function useProspects() {
     setPage(1);
   }, [search, status, sort, order]);
 
-  const hasInProgressRows = !!data?.items.some((p) => IN_PROGRESS.includes(p.status));
+  const hasInProgressRows = !!data?.items.some((p) => IN_PROGRESS_STATUSES.includes(p.status));
   useEffect(() => {
     if (!hasInProgressRows) return;
     const interval = setInterval(() => load(true), 3000);

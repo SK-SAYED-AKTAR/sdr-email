@@ -13,11 +13,14 @@ from app.models.prospect import Prospect, ProspectStatus
 from app.schemas.prospects import (
     BulkRegenerateRequest,
     BulkRegenerateResponse,
+    BulkSendRequest,
+    BulkSendResponse,
+    BulkSendResult,
     ProspectListItemOut,
     ProspectListOut,
     ProspectOutreachUpdate,
 )
-from app.services import pipeline_service
+from app.services import pipeline_service, send_service
 
 router = APIRouter(prefix="/api/prospects", tags=["prospects"])
 
@@ -85,6 +88,7 @@ def _to_item(prospect: Prospect) -> ProspectListItemOut:
         email_preview=preview,
         email_body=outreach.get("email_body"),
         generated_at=meta.get("generated_at"),
+        sent_at=prospect.sent_at,
     )
 
 
@@ -204,3 +208,39 @@ async def bulk_regenerate_prospects(
         background_tasks.add_task(pipeline_service.regenerate_prospect_email, prospect_id)
 
     return BulkRegenerateResponse(accepted=accepted, skipped=skipped)
+
+
+@router.post("/bulk-send", response_model=BulkSendResponse)
+async def bulk_send_prospects(
+    payload: BulkSendRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> BulkSendResponse:
+    """Sends real emails through the user's own verified SMTP account, one at
+    a time. Unlike regenerate, this runs in-request rather than as a
+    background task -- sending a real email to a real inbox needs an
+    authoritative per-email success/failure result, not a status poll."""
+    user = await security.get_current_user(request, db)
+
+    result = await db.execute(
+        select(Prospect).where(Prospect.id.in_(payload.prospect_ids), Prospect.user_id == user.id)
+    )
+    prospects = result.scalars().all()
+    if len(prospects) != len(set(payload.prospect_ids)):
+        raise HTTPException(status_code=404, detail="One or more emails were not found.")
+
+    results: list[BulkSendResult] = []
+    for prospect in prospects:
+        if prospect.status != ProspectStatus.COMPLETED:
+            results.append(
+                BulkSendResult(prospect_id=prospect.id, success=False, error="This email hasn't been generated yet.")
+            )
+            continue
+        try:
+            await send_service.send_prospect_email(prospect, user)
+            results.append(BulkSendResult(prospect_id=prospect.id, success=True))
+        except send_service.SendError as exc:
+            results.append(BulkSendResult(prospect_id=prospect.id, success=False, error=str(exc)))
+
+    await db.commit()
+    return BulkSendResponse(results=results)

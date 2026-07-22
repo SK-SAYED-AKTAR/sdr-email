@@ -26,6 +26,7 @@ export type Prospect = {
   email_preview: string | null;
   email_body: string | null;
   generated_at: string | null;
+  sent_at: string | null;
 };
 
 export type ProspectListResponse = {
@@ -93,4 +94,21 @@ export function bulkRegenerateProspects(prospectIds: string[]): Promise<BulkRege
 
 export function regenerateProspect(id: string): Promise<BulkRegenerateResponse> {
   return bulkRegenerateProspects([id]);
+}
+
+export type BulkSendResult = {
+  prospect_id: string;
+  success: boolean;
+  error: string | null;
+};
+
+export type BulkSendResponse = {
+  results: BulkSendResult[];
+};
+
+export function bulkSendProspects(prospectIds: string[]): Promise<BulkSendResponse> {
+  return apiFetch<BulkSendResponse>("/api/prospects/bulk-send", {
+    method: "POST",
+    body: JSON.stringify({ prospect_ids: prospectIds }),
+  });
 }

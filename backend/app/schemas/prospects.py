@@ -52,6 +52,7 @@ class ProspectListItemOut(BaseModel):
     email_preview: str | None
     email_body: str | None
     generated_at: str | None
+    sent_at: datetime | None
 
 
 class ProspectListOut(BaseModel):
@@ -74,3 +75,17 @@ class BulkRegenerateRequest(BaseModel):
 class BulkRegenerateResponse(BaseModel):
     accepted: list[uuid.UUID]
     skipped: list[uuid.UUID]
+
+
+class BulkSendRequest(BaseModel):
+    prospect_ids: list[uuid.UUID] = Field(min_length=1, max_length=100)
+
+
+class BulkSendResult(BaseModel):
+    prospect_id: uuid.UUID
+    success: bool
+    error: str | None = None
+
+
+class BulkSendResponse(BaseModel):
+    results: list[BulkSendResult]

@@ -166,6 +166,7 @@ export default function SendEmailPage() {
         selectedIds={Array.from(selected)}
         onClear={() => setSelected(new Set())}
         onRegenerated={refetch}
+        onSent={refetch}
       />
     </ContentContainer>
   );

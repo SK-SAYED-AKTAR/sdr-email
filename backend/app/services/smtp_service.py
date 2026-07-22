@@ -43,14 +43,7 @@ def verify_login(host: str, port: int, username: str, password: str) -> None:
         raise SmtpAuthError("Could not connect or authenticate with the provided SMTP details.")
 
 
-def send_test_email(host: str, port: int, username: str, password: str, to_email: str) -> None:
-    """Connects, authenticates, and sends the success email in a single session."""
-    message = EmailMessage()
-    message["Subject"] = SUCCESS_SUBJECT
-    message["From"] = to_email
-    message["To"] = to_email
-    message.set_content(SUCCESS_BODY)
-
+def _send_message(host: str, port: int, username: str, password: str, message: EmailMessage) -> None:
     try:
         server = _connect(host, port, username, password)
         server.send_message(message)
@@ -58,3 +51,25 @@ def send_test_email(host: str, port: int, username: str, password: str, to_email
     except Exception:
         logger.exception("SMTP send failed for host=%s port=%s", host, port)
         raise SmtpAuthError("Could not connect or authenticate with the provided SMTP details.")
+
+
+def send_test_email(host: str, port: int, username: str, password: str, to_email: str) -> None:
+    """Connects, authenticates, and sends the success email in a single session."""
+    message = EmailMessage()
+    message["Subject"] = SUCCESS_SUBJECT
+    message["From"] = to_email
+    message["To"] = to_email
+    message.set_content(SUCCESS_BODY)
+    _send_message(host, port, username, password, message)
+
+
+def send_outreach_email(
+    host: str, port: int, username: str, password: str, from_email: str, to_email: str, subject: str, body: str
+) -> None:
+    """Sends a generated outreach email as the authenticated user."""
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = from_email
+    message["To"] = to_email
+    message.set_content(body)
+    _send_message(host, port, username, password, message)

@@ -11,3 +11,9 @@
 [2026-07-22T18:57:45.895Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
 [2026-07-22T19:01:48.468Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
 [2026-07-22T19:02:29.650Z] [error] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr' failed: 
+[2026-07-22T19:23:19.295Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2026-07-22T19:23:19.625Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[2026-07-22T19:23:19.630Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[2026-07-22T19:23:19.756Z] [log] [Fast Refresh] rebuilding
+[2026-07-22T19:23:20.380Z] [log] [Fast Refresh] done in 625ms
+[2026-07-22T19:23:26.560Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold

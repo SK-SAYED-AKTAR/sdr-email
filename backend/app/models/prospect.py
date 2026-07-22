@@ -58,6 +58,7 @@ class Prospect(Base):
         Enum(ProspectStatus, name="prospect_status"), default=ProspectStatus.PENDING, nullable=False, index=True
     )
     failure_reason: Mapped[str | None] = mapped_column(Text)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(

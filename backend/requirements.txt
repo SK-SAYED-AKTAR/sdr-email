@@ -9,3 +9,7 @@ email-validator
 pyjwt
 cryptography
 python-dotenv
+python-multipart
+openai
+pypdf
+python-docx

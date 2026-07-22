@@ -1,8 +1,21 @@
-export function PageHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+import type { ReactNode } from "react";
+
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+}: {
+  title: string;
+  subtitle?: string;
+  actions?: ReactNode;
+}) {
   return (
-    <div className="space-y-1.5">
-      <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
-      {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+    <div className="flex items-start justify-between gap-4">
+      <div className="space-y-1.5">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+      </div>
+      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </div>
   );
 }

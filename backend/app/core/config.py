@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     ENCRYPTION_KEY: str
     COOKIE_SECURE: bool = False
     FRONTEND_ORIGIN: str = "http://localhost:3000"
+    OPENAI_API_KEY: str
+    OPENAI_ORG: str
 
     @property
     def admin_database_url(self) -> str:

@@ -1,3 +1,5 @@
+import { apiFetch } from "@/lib/api";
+
 export type SellerDocument = {
   id: string;
   filename: string;
@@ -52,3 +54,7 @@ export type SellerKnowledgeProfile = {
   knowledge: SellerKnowledgeEnvelope | null;
   documents: SellerDocument[];
 };
+
+export function fetchSellerKnowledge(): Promise<SellerKnowledgeProfile> {
+  return apiFetch<SellerKnowledgeProfile>("/api/seller-knowledge");
+}

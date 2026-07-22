@@ -15,7 +15,7 @@ import { EmailPreviewModal } from "@/components/dashboard/send-email/email-previ
 import { BulkActionBar } from "@/components/dashboard/send-email/bulk-action-bar";
 import { EmptyState, NoResultsState } from "@/components/dashboard/send-email/empty-state";
 import { TableLoadingSkeleton } from "@/components/dashboard/send-email/loading-skeleton";
-import { SellerKnowledgeNotice } from "@/components/dashboard/send-email/seller-knowledge-notice";
+import { SellerKnowledgeNotice } from "@/components/dashboard/seller-knowledge-notice";
 import { ErrorBanner } from "@/components/error-banner";
 import { useProspects } from "@/hooks/use-prospects";
 import { apiFetch } from "@/lib/api";

@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { StatusBadge } from "@/components/dashboard/send-email/status-badge";
+import { SentIndicator, StatusBadge } from "@/components/dashboard/send-email/status-badge";
 import { FacebookIcon, LinkedinIcon, TwitterIcon } from "@/components/icons/brand-icons";
 import { formatRelativeDate, getDomain } from "@/lib/format";
 import type { Prospect } from "@/lib/prospects";
@@ -111,7 +111,10 @@ export function EmailRow({
         {prospect.email_preview || <span className="text-muted-foreground/50">—</span>}
       </td>
       <td className="py-3 pr-4">
-        <StatusBadge status={prospect.status} />
+        <div className="flex items-center gap-2">
+          <StatusBadge status={prospect.status} />
+          <SentIndicator sentAt={prospect.sent_at} />
+        </div>
       </td>
       <td className="py-3 pr-4 text-sm whitespace-nowrap text-muted-foreground">
         {formatRelativeDate(prospect.created_at)}

@@ -6,7 +6,7 @@ import { Eye, Globe } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/dashboard/send-email/status-badge";
+import { SentIndicator, StatusBadge } from "@/components/dashboard/send-email/status-badge";
 import { FacebookIcon, LinkedinIcon, TwitterIcon } from "@/components/icons/brand-icons";
 import { formatRelativeDate, getDomain } from "@/lib/format";
 import type { Prospect } from "@/lib/prospects";
@@ -46,7 +46,10 @@ export function EmailCard({
             <p className="truncate text-xs text-muted-foreground">{prospect.company_name}</p>
           </div>
         </div>
-        <StatusBadge status={prospect.status} />
+        <div className="flex shrink-0 items-center gap-2">
+          <StatusBadge status={prospect.status} />
+          <SentIndicator sentAt={prospect.sent_at} />
+        </div>
       </div>
 
       {prospect.subject && (

@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
-import { Check } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 import { apiFetch } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { InlineSavedField } from "@/components/inline-saved-field";
 import type { SellerKnowledgeProfile } from "@/lib/seller-knowledge";
 
 type Field = "company_name" | "company_website" | "product_website" | "additional_notes";
@@ -57,7 +55,7 @@ export function CompanyInfoCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Company Name" saved={savedField === "company_name"}>
+          <InlineSavedField label="Company Name" saved={savedField === "company_name"}>
             <Input
               value={values.company_name}
               disabled={disabled}
@@ -65,8 +63,8 @@ export function CompanyInfoCard({
               onBlur={() => handleBlur("company_name", profile.company_name)}
               placeholder="Acme Inc."
             />
-          </Field>
-          <Field label="Company Website" saved={savedField === "company_website"}>
+          </InlineSavedField>
+          <InlineSavedField label="Company Website" saved={savedField === "company_website"}>
             <Input
               type="url"
               value={values.company_website}
@@ -75,9 +73,9 @@ export function CompanyInfoCard({
               onBlur={() => handleBlur("company_website", profile.company_website)}
               placeholder="https://acme.com"
             />
-          </Field>
+          </InlineSavedField>
         </div>
-        <Field label="Product Website" hint="Optional" saved={savedField === "product_website"}>
+        <InlineSavedField label="Product Website" hint="Optional" saved={savedField === "product_website"}>
           <Input
             type="url"
             value={values.product_website}
@@ -86,8 +84,8 @@ export function CompanyInfoCard({
             onBlur={() => handleBlur("product_website", profile.product_website)}
             placeholder="https://acme.com/product"
           />
-        </Field>
-        <Field label="Additional Notes" saved={savedField === "additional_notes"}>
+        </InlineSavedField>
+        <InlineSavedField label="Additional Notes" saved={savedField === "additional_notes"}>
           <Textarea
             rows={5}
             value={values.additional_notes}
@@ -96,43 +94,8 @@ export function CompanyInfoCard({
             onBlur={() => handleBlur("additional_notes", profile.additional_notes)}
             placeholder="Tell the AI anything that isn't available on your website. Describe your ideal customers, positioning, pricing, competitors, or important selling points."
           />
-        </Field>
+        </InlineSavedField>
       </CardContent>
     </Card>
-  );
-}
-
-function Field({
-  label,
-  hint,
-  saved,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  saved?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <Label>
-          {label} {hint && <span className="font-normal text-muted-foreground">({hint})</span>}
-        </Label>
-        <AnimatePresence>
-          {saved && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center gap-1 text-xs text-success"
-            >
-              <Check className="size-3" /> Saved
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </div>
-      {children}
-    </div>
   );
 }

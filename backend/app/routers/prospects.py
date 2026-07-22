@@ -1,14 +1,16 @@
 import math
+import uuid
+from datetime import datetime, timezone
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import security
 from app.db.session import get_db
 from app.models.prospect import Prospect, ProspectStatus
-from app.schemas.prospects import ProspectListItemOut, ProspectListOut
+from app.schemas.prospects import ProspectListItemOut, ProspectListOut, ProspectOutreachUpdate
 
 router = APIRouter(prefix="/api/prospects", tags=["prospects"])
 
@@ -34,15 +36,19 @@ STATUS_FILTERS: dict[str, list[ProspectStatus]] = {
 }
 
 
+def _build_preview(text: str) -> str:
+    preview = " ".join(text.split())
+    if len(preview) > 120:
+        preview = preview[:117].rstrip() + "..."
+    return preview
+
+
 def _to_item(prospect: Prospect) -> ProspectListItemOut:
     outreach = (prospect.outreach or {}).get("data") or {}
     meta = (prospect.outreach or {}).get("meta") or {}
 
-    preview = outreach.get("preview_text") or outreach.get("email_body")
-    if preview:
-        preview = " ".join(preview.split())
-        if len(preview) > 120:
-            preview = preview[:117].rstrip() + "..."
+    raw_preview = outreach.get("preview_text") or outreach.get("email_body")
+    preview = _build_preview(raw_preview) if raw_preview else None
 
     return ProspectListItemOut(
         id=prospect.id,
@@ -114,3 +120,33 @@ async def list_prospects(
         limit=limit,
         total_pages=math.ceil(total / limit) if total else 0,
     )
+
+
+@router.patch("/{prospect_id}", response_model=ProspectListItemOut)
+async def update_prospect_outreach(
+    prospect_id: uuid.UUID,
+    payload: ProspectOutreachUpdate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> ProspectListItemOut:
+    user = await security.get_current_user(request, db)
+
+    prospect = await db.get(Prospect, prospect_id)
+    if prospect is None or prospect.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Email not found.")
+    if not prospect.outreach:
+        raise HTTPException(status_code=400, detail="This email hasn't been generated yet.")
+
+    subject = payload.subject.strip()
+    email_body = payload.email_body.strip()
+    if not subject or not email_body:
+        raise HTTPException(status_code=400, detail="Subject and email body can't be empty.")
+
+    data = {**prospect.outreach["data"], "subject": subject, "email_body": email_body}
+    data["preview_text"] = _build_preview(email_body)
+    meta = {**prospect.outreach.get("meta", {}), "edited_at": datetime.now(timezone.utc).isoformat()}
+    prospect.outreach = {"data": data, "meta": meta}
+
+    await db.commit()
+    await db.refresh(prospect)
+    return _to_item(prospect)

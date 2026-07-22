@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { FileUp, Loader2, UploadCloud } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { apiFetch, ApiError } from "@/lib/api";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { ErrorBanner } from "@/components/error-banner";
 import { SuccessCard } from "@/components/success-card";
+import { FileDropzone } from "@/components/file-dropzone";
 
 type UploadResult = { id: string; filename: string; row_count: number };
 
@@ -66,10 +67,8 @@ export function UploadCsvDialog({ open, onOpenChange }: { open: boolean; onOpenC
   const [file, setFile] = useState<File | null>(null);
   const [rowCount, setRowCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [dragActive, setDragActive] = useState(false);
   const [upload, setUpload] = useState<UploadResult | null>(null);
   const [progress, setProgress] = useState<UploadProgress | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) {
@@ -125,13 +124,6 @@ export function UploadCsvDialog({ open, onOpenChange }: { open: boolean; onOpenC
     }
   }, []);
 
-  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setDragActive(false);
-    const dropped = e.dataTransfer.files?.[0];
-    if (dropped) handleFile(dropped);
-  }
-
   const total = progress?.total ?? rowCount ?? 0;
   const done = progress ? (progress.counts.COMPLETED ?? 0) + (progress.counts.FAILED ?? 0) : 0;
   const failed = progress?.counts.FAILED ?? 0;
@@ -153,42 +145,11 @@ export function UploadCsvDialog({ open, onOpenChange }: { open: boolean; onOpenC
         {phase === "idle" && (
           <div className="space-y-3">
             {error && <ErrorBanner message={error} />}
-            <div
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDragActive(true);
-              }}
-              onDragLeave={() => setDragActive(false)}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={cn(
-                "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 py-10 text-center transition-colors",
-                dragActive ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
-              )}
-            >
-              <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                <UploadCloud className="size-5" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Drag & drop your CSV here</p>
-                <p className="text-xs text-muted-foreground">Supported file type: CSV</p>
-              </div>
-              <Button type="button" variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-                <FileUp className="size-4" />
-                Browse files
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv"
-                className="hidden"
-                onChange={(e) => {
-                  const selected = e.target.files?.[0];
-                  if (selected) handleFile(selected);
-                  e.target.value = "";
-                }}
-              />
-            </div>
+            <FileDropzone
+              accept=".csv"
+              supportedLabel="Supported file type: CSV"
+              onFiles={(files) => handleFile(files[0])}
+            />
           </div>
         )}
 

@@ -20,7 +20,11 @@ export default function SendEmailPage() {
         subtitle="Email sending functionality will be available soon."
         actions={
           <>
-            <Button variant="outline" render={<a href={`${BACKEND_URL}/api/csv/sample`} download />}>
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<a href={`${BACKEND_URL}/api/csv/sample`} download />}
+            >
               <Download className="size-4" />
               Download Sample CSV
             </Button>

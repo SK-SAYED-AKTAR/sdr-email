@@ -1,9 +1,9 @@
-[2026-07-19T20:19:20.440Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
-[2026-07-19T20:19:22.456Z] [log] [Fast Refresh] rebuilding
-[2026-07-19T20:19:26.238Z] [log] [Fast Refresh] done in 3783ms
-[2026-07-19T20:19:26.347Z] [log] [Fast Refresh] rebuilding
-[2026-07-19T20:19:29.492Z] [log] [Fast Refresh] done in 3146ms
-[2026-07-19T20:19:29.522Z] [error] Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. TypeError: Failed to fetch
+[2026-07-19T21:00:41.753Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2026-07-19T21:00:42.647Z] [log] [Fast Refresh] rebuilding
+[2026-07-19T21:00:43.718Z] [log] [Fast Refresh] done in 1072ms
+[2026-07-19T21:00:43.774Z] [log] [Fast Refresh] rebuilding
+[2026-07-19T21:00:44.359Z] [log] [Fast Refresh] done in 584ms
+[2026-07-19T21:00:44.367Z] [error] Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. TypeError: Failed to fetch
     at fetchServerResponse (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/router-reducer/fetch-server-response.js:59:27)
     at fastRefreshReducerImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/router-reducer/reducers/fast-refresh-reducer.js:33:67)
     at clientReducer (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/router-reducer/router-reducer.js:41:67)
@@ -11,16 +11,16 @@
     at runAction (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/router/action-queue.js:56:38)
     at runRemainingActions (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/router/action-queue.js:30:13)
     at handleResult (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/shared/lib/router/action-queue.js:66:9)
-[2026-07-19T20:19:31.196Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
-[2026-07-19T20:19:32.326Z] [error] Base UI: A component that acts as a button expected a native <button> because the `nativeButton` prop is true. Rendering a non-<button> removes native button semantics, which can impact forms and accessibility. Use a real <button> in the `render` prop, or set `nativeButton` to `false`.
-[2026-07-19T20:20:54.349Z] [error] Failed to load resource: the server responded with a status of 400 (Bad Request)
-[2026-07-19T20:21:39.293Z] [log] [Fast Refresh] rebuilding
-[2026-07-19T20:21:40.114Z] [log] [Fast Refresh] rebuilding
-[2026-07-19T20:21:40.149Z] [log] [Fast Refresh] done in 33ms
-[2026-07-19T20:21:41.286Z] [log] [Fast Refresh] done in 1176ms
-[2026-07-19T20:22:44.861Z] [log] [Fast Refresh] rebuilding
-[2026-07-19T20:22:45.709Z] [log] [Fast Refresh] rebuilding
-[2026-07-19T20:22:45.741Z] [log] [Fast Refresh] done in 29ms
-[2026-07-19T20:22:46.727Z] [log] [Fast Refresh] done in 1013ms
-[2026-07-19T20:22:56.026Z] [log] [Fast Refresh] rebuilding
-[2026-07-19T20:22:56.505Z] [log] [Fast Refresh] done in 479ms
+[2026-07-19T21:00:45.010Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2026-07-19T21:03:45.767Z] [log] [Fast Refresh] rebuilding
+[2026-07-19T21:03:46.108Z] [log] [Fast Refresh] done in 342ms
+[2026-07-19T21:04:40.547Z] [log] [Fast Refresh] rebuilding
+[2026-07-19T21:04:41.182Z] [log] [Fast Refresh] done in 635ms
+[2026-07-19T21:04:41.799Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2026-07-19T21:04:42.161Z] [error] Base UI: A component that acts as a button expected a native <button> because the `nativeButton` prop is true. Rendering a non-<button> removes native button semantics, which can impact forms and accessibility. Use a real <button> in the `render` prop, or set `nativeButton` to `false`.
+[2026-07-19T21:05:13.027Z] [log] [Fast Refresh] rebuilding
+[2026-07-19T21:05:13.420Z] [log] [Fast Refresh] done in 394ms
+[2026-07-19T21:05:22.809Z] [log] [Fast Refresh] rebuilding
+[2026-07-19T21:05:23.004Z] [log] [Fast Refresh] done in 195ms
+[2026-07-19T21:05:32.321Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2026-07-19T21:05:42.930Z] [info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold

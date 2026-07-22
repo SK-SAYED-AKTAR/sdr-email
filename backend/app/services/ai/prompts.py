@@ -9,6 +9,7 @@ PROMPT_VERSIONS = {
     "research_agent": "v1",
     "matching_agent": "v1",
     "email_agent": "v1",
+    "seller_intelligence": "v1",
 }
 
 

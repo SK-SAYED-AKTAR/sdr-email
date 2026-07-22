@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Download, UploadCloud } from "lucide-react";
+import { toast } from "sonner";
 
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ContentContainer } from "@/components/dashboard/content-container";
@@ -13,16 +15,38 @@ import { EmailPreviewModal } from "@/components/dashboard/send-email/email-previ
 import { BulkActionBar } from "@/components/dashboard/send-email/bulk-action-bar";
 import { EmptyState, NoResultsState } from "@/components/dashboard/send-email/empty-state";
 import { TableLoadingSkeleton } from "@/components/dashboard/send-email/loading-skeleton";
+import { SellerKnowledgeNotice } from "@/components/dashboard/send-email/seller-knowledge-notice";
 import { ErrorBanner } from "@/components/error-banner";
 import { useProspects } from "@/hooks/use-prospects";
+import { apiFetch } from "@/lib/api";
 import type { Prospect } from "@/lib/prospects";
+import type { SellerKnowledgeProfile } from "@/lib/seller-knowledge";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
 
 export default function SendEmailPage() {
+  const router = useRouter();
   const [uploadOpen, setUploadOpen] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [previewProspect, setPreviewProspect] = useState<Prospect | null>(null);
+  const [sellerKnowledge, setSellerKnowledge] = useState<SellerKnowledgeProfile | null>(null);
+
+  useEffect(() => {
+    apiFetch<SellerKnowledgeProfile>("/api/seller-knowledge")
+      .then(setSellerKnowledge)
+      .catch(() => {});
+  }, []);
+
+  const needsSellerKnowledge = sellerKnowledge !== null && !sellerKnowledge.knowledge;
+
+  function handleUploadClick() {
+    if (needsSellerKnowledge) {
+      toast("Set up your Company Knowledge first so the AI knows what to pitch.");
+      router.push("/dashboard/settings");
+      return;
+    }
+    setUploadOpen(true);
+  }
 
   const {
     data,
@@ -87,13 +111,15 @@ export default function SendEmailPage() {
                 <Download className="size-4" />
                 Download Sample CSV
               </Button>
-              <Button onClick={() => setUploadOpen(true)}>
+              <Button onClick={handleUploadClick}>
                 <UploadCloud className="size-4" />
                 Upload CSV
               </Button>
             </>
           }
         />
+
+        {needsSellerKnowledge && <SellerKnowledgeNotice />}
 
         <div className="space-y-4">
           <div className="space-y-1">
@@ -136,7 +162,7 @@ export default function SendEmailPage() {
                   {isFiltered ? (
                     <NoResultsState onClear={clearFilters} />
                   ) : (
-                    <EmptyState onUploadClick={() => setUploadOpen(true)} />
+                    <EmptyState onUploadClick={handleUploadClick} />
                   )}
                 </div>
               )}

@@ -34,12 +34,13 @@ export function SidebarFooter({
       disabled={loggingOut}
       aria-label="Log out"
       className={cn(
-        "flex h-10 w-full cursor-pointer items-center gap-3 rounded-lg px-3 text-sm font-medium text-sidebar-foreground/65 outline-none transition-colors duration-200 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground disabled:cursor-not-allowed disabled:opacity-50",
+        "group relative flex h-11 w-full cursor-pointer items-center gap-3 rounded-2xl px-3.5 text-sm font-medium text-sidebar-foreground/55 outline-none transition-colors duration-200 hover:text-destructive disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
         "focus-visible:ring-3 focus-visible:ring-sidebar-ring/50",
         collapsed && "justify-center px-0"
       )}
     >
-      <LogOut className="size-[18px] shrink-0" />
+      <span className="absolute inset-0 rounded-2xl bg-destructive/0 transition-colors duration-200 group-hover:bg-destructive/8" />
+      <LogOut className="relative z-10 size-[18px] shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5" strokeWidth={1.75} />
       <AnimatePresence initial={false}>
         {!collapsed && (
           <motion.span
@@ -47,7 +48,7 @@ export function SidebarFooter({
             animate={{ opacity: 1, width: "auto" }}
             exit={{ opacity: 0, width: 0 }}
             transition={{ duration: 0.15 }}
-            className="overflow-hidden whitespace-nowrap"
+            className="relative z-10 overflow-hidden whitespace-nowrap"
           >
             {loggingOut ? "Logging out..." : "Log out"}
           </motion.span>
@@ -57,7 +58,7 @@ export function SidebarFooter({
   );
 
   return (
-    <div className="flex flex-col gap-1 border-t border-sidebar-border pt-2">
+    <div className="flex flex-col gap-1 border-t border-sidebar-border/70 pt-3">
       <SidebarItem item={SETTINGS_ITEM} collapsed={collapsed} onNavigate={onNavigate} />
       {collapsed ? (
         <Tooltip>

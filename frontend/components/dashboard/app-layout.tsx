@@ -1,46 +1,41 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Menu } from "lucide-react";
 
 import { apiFetch } from "@/lib/api";
-import { Logo } from "@/components/logo";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import {
   NavigationProvider,
   useNavigation,
-  SIDEBAR_EXPANDED_WIDTH,
+  sidebarContentOffset,
 } from "@/components/dashboard/navigation-provider";
-
-function MobileTopBar() {
-  const { setMobileOpen } = useNavigation();
-
-  return (
-    <div className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-4 md:hidden">
-      <button
-        type="button"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Open navigation"
-        className="flex size-8 cursor-pointer items-center justify-center rounded-md text-foreground/70 outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <Menu className="size-[18px]" />
-      </button>
-      <Logo />
-    </div>
-  );
-}
 
 function ShellSkeleton() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      <div
-        style={{ width: SIDEBAR_EXPANDED_WIDTH }}
-        className="hidden h-full shrink-0 animate-pulse border-r border-sidebar-border bg-sidebar md:block"
-      />
+      <div className="m-3 hidden h-[calc(100vh-24px)] w-[272px] shrink-0 animate-pulse rounded-[26px] bg-muted/60 md:block" />
       <div className="flex-1 p-10">
-        <div className="h-8 w-48 animate-pulse rounded-lg bg-muted" />
+        <div className="h-8 w-48 animate-pulse rounded-full bg-muted" />
+      </div>
+    </div>
+  );
+}
+
+function Shell({ children }: { children: ReactNode }) {
+  const { collapsed } = useNavigation();
+
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      <AppSidebar />
+      <div
+        className="flex min-w-0 flex-1 flex-col transition-[padding-left] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:pl-(--sidebar-offset)"
+        style={{ "--sidebar-offset": `${sidebarContentOffset(collapsed)}px` } as CSSProperties}
+      >
+        <DashboardHeader />
+        <main className="flex-1 overflow-y-auto pb-6">{children}</main>
       </div>
     </div>
   );
@@ -63,13 +58,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <NavigationProvider>
       <TooltipProvider>
-        <div className="flex h-screen w-full overflow-hidden bg-background">
-          <AppSidebar />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <MobileTopBar />
-            <main className="flex-1 overflow-y-auto">{children}</main>
-          </div>
-        </div>
+        <Shell>{children}</Shell>
       </TooltipProvider>
     </NavigationProvider>
   );

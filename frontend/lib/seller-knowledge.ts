@@ -10,16 +10,22 @@ export type SellerKnowledgeData = {
   company_summary: string;
   product_summary: string;
   ideal_customer_profile: string[];
-  target_personas: string[];
-  industries: string[];
-  core_features: string[];
+  primary_industries: string[];
   business_problems_solved: string[];
-  value_propositions: string[];
+  core_capabilities: string[];
+  differentiators: string[];
   competitive_advantages: string[];
   pricing_position: string;
-  social_proof: string[];
+  buyer_personas: string[];
+  cost_savings: string[];
+  time_savings: string[];
+  automation_opportunities: string[];
+  customer_outcomes: string[];
+  proof_points: string[];
+  discovery_questions: string[];
+  common_objections: string[];
+  why_customers_switch: string[];
   recommended_pitch: string;
-  keywords: string[];
   confidence: number;
 };
 

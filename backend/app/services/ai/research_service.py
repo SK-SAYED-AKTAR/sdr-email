@@ -14,19 +14,29 @@ class ProspectIntelligence(BaseModel):
     products_services: str
     target_customers: str
     business_model: str
+    customer_journey: str
+    growth_stage: str
+    technology_adoption: str
+    sales_maturity: str
+    support_maturity: str
+    customer_experience_maturity: str
     unique_selling_points: list[str]
-    likely_pain_points: list[str]
+    likely_operational_challenges: list[str]
+    support_bottlenecks: list[str]
     growth_opportunities: list[str]
+    hiring_signals: list[str]
+    expansion_signals: list[str]
     technology_signals: list[str]
-    recommended_pitch_angle: str
+    ai_adoption_signals: list[str]
     confidence_score: float = Field(ge=0, le=1)
     source_urls: list[str]
 
 
 async def research_prospect(prospect: Prospect) -> dict:
-    """Researches one company via web search. Single responsibility: research
-    only, no matching or copywriting. Returns a {data, meta} envelope ready to
-    store on Prospect.research."""
+    """Researches one company via web search, including inferred operational
+    signals (growth stage, maturity, bottlenecks). Single responsibility:
+    research only, no business reasoning or copywriting. Returns a {data, meta}
+    envelope ready to store on Prospect.research."""
     client = get_openai_client()
 
     contact = f"{prospect.first_name} {prospect.last_name}"

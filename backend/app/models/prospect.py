@@ -12,7 +12,7 @@ from app.db.session import Base
 class ProspectStatus(str, enum.Enum):
     PENDING = "PENDING"
     RESEARCHING = "RESEARCHING"
-    MATCHING = "MATCHING"
+    ANALYZING_OPPORTUNITY = "ANALYZING_OPPORTUNITY"
     GENERATING_EMAIL = "GENERATING_EMAIL"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
@@ -21,9 +21,9 @@ class ProspectStatus(str, enum.Enum):
 class Prospect(Base):
     """
     One row from an uploaded CSV, carried through the pipeline:
-    research -> matching -> email generation.
+    research -> business opportunity analysis -> email generation.
 
-    `research`, `matching`, and `outreach` each store a {"data": ..., "meta": ...}
+    `research`, `opportunity`, and `outreach` each store a {"data": ..., "meta": ...}
     envelope, where `meta` carries {model_name, prompt_version, generated_at} for
     traceability. They are saved incrementally as each stage completes, so a
     mid-pipeline failure still preserves whatever was already produced.
@@ -51,7 +51,7 @@ class Prospect(Base):
     twitter_url: Mapped[str | None] = mapped_column(String(1024))
 
     research: Mapped[dict | None] = mapped_column(JSONB)
-    matching: Mapped[dict | None] = mapped_column(JSONB)
+    opportunity: Mapped[dict | None] = mapped_column(JSONB)
     outreach: Mapped[dict | None] = mapped_column(JSONB)
 
     status: Mapped[ProspectStatus] = mapped_column(

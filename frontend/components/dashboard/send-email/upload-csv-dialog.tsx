@@ -41,7 +41,7 @@ type Phase = "idle" | "uploading" | "processing" | "done";
 
 const STAGES: { key: string; label: string }[] = [
   { key: "RESEARCHING", label: "Researching companies" },
-  { key: "MATCHING", label: "Matching prospects" },
+  { key: "ANALYZING_OPPORTUNITY", label: "Analyzing business opportunity" },
   { key: "GENERATING_EMAIL", label: "Generating emails" },
 ];
 

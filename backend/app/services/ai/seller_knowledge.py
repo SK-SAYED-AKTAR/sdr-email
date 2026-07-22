@@ -1,41 +1,46 @@
 import uuid
 
-from pydantic import BaseModel
+from app.db.session import SessionLocal
+from app.services import seller_knowledge_service
+from app.services.ai.seller_intelligence_service import SellerIntelligence
 
-
-class SellerKnowledge(BaseModel):
-    """
-    What the Matching and Email services know about the seller (our customer)
-    and their product. Consumed as data, never embedded directly into prompts,
-    so the source can change without touching those services.
-
-    Today this always comes back as a placeholder — there is no onboarding UI
-    yet to build it from a company website, product docs, a PDF brochure, a
-    pitch deck, or freeform notes. When that exists, `get_seller_knowledge`
-    below is the only place that needs to change: it should look up a
-    persisted profile (e.g. a `seller_knowledge_base` table keyed by user_id)
-    and fall back to this placeholder if the user hasn't completed onboarding.
-    """
-
-    company_name: str
-    product_name: str
-    product_description: str
-    value_proposition: str
-    target_customer: str
-    notes: str
-    is_placeholder: bool = False
-
-
-PLACEHOLDER_SELLER_KNOWLEDGE = SellerKnowledge(
-    company_name="Unknown",
-    product_name="Unknown",
-    product_description="Not yet configured. The seller has not completed onboarding.",
-    value_proposition="Unknown",
-    target_customer="Unknown",
-    notes="Seller knowledge base is not yet implemented. Treat all seller-side claims as unavailable.",
-    is_placeholder=True,
+# Empty, zero-confidence profile returned when the user hasn't generated
+# Company Knowledge yet (Settings -> Company Knowledge), so the pipeline can
+# always run. Every prompt is instructed to treat empty/"Unknown" seller
+# knowledge with confidence 0 as "not yet configured" and hedge accordingly.
+PLACEHOLDER_SELLER_KNOWLEDGE = SellerIntelligence(
+    company_summary="Unknown",
+    product_summary="Unknown",
+    ideal_customer_profile=[],
+    primary_industries=[],
+    business_problems_solved=[],
+    core_capabilities=[],
+    differentiators=[],
+    competitive_advantages=[],
+    pricing_position="Unknown",
+    buyer_personas=[],
+    cost_savings=[],
+    time_savings=[],
+    automation_opportunities=[],
+    customer_outcomes=[],
+    proof_points=[],
+    discovery_questions=[],
+    common_objections=[],
+    why_customers_switch=[],
+    recommended_pitch="Unknown",
+    confidence=0.0,
 )
 
 
-async def get_seller_knowledge(user_id: uuid.UUID) -> SellerKnowledge:
-    return PLACEHOLDER_SELLER_KNOWLEDGE
+async def get_seller_knowledge(user_id: uuid.UUID) -> SellerIntelligence:
+    """Single access point every pipeline stage uses for seller knowledge.
+    Looks up the user's generated Company Knowledge profile (Settings ->
+    Company Knowledge) and falls back to an empty placeholder if they haven't
+    generated one yet."""
+    async with SessionLocal() as db:
+        profile = await seller_knowledge_service.get_or_create_profile(db, user_id)
+
+    if profile.knowledge_json is None:
+        return PLACEHOLDER_SELLER_KNOWLEDGE
+
+    return SellerIntelligence(**profile.knowledge_json["data"])

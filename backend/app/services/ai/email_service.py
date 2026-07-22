@@ -6,28 +6,28 @@ from app.models.prospect import Prospect
 from app.services.ai.client import MODEL_NAME, get_openai_client
 from app.services.ai.envelope import make_envelope
 from app.services.ai.prompts import load_prompt, prompt_version
-from app.services.ai.seller_knowledge import SellerKnowledge
+from app.services.ai.seller_intelligence_service import SellerIntelligence
 
 PROMPT_NAME = "email_agent"
 
 
 class OutreachDraft(BaseModel):
     subject: str
+    preview_text: str
     email_body: str
-    reasoning: str
     cta: str
-    tone: str
 
 
 async def generate_outreach(
     prospect: Prospect,
+    seller_knowledge: SellerIntelligence,
     prospect_intelligence: dict,
-    sales_strategy: dict,
-    seller_knowledge: SellerKnowledge,
+    business_opportunity: dict,
 ) -> dict:
-    """Writes the final cold email from everything the earlier stages produced.
-    Single responsibility: copywriting only. Returns a {data, meta} envelope
-    ready to store on Prospect.outreach."""
+    """Writes the final cold email. Never decides what to sell — the business
+    problem, capability, and angle already come from the Business Opportunity
+    Analysis stage. Single responsibility: communication quality only. Returns
+    a {data, meta} envelope ready to store on Prospect.outreach."""
     client = get_openai_client()
 
     input_payload = {
@@ -36,11 +36,10 @@ async def generate_outreach(
             "last_name": prospect.last_name,
             "title": prospect.title,
             "company_name": prospect.company_name,
-            "email": prospect.email,
         },
-        "prospect_intelligence": prospect_intelligence,
-        "sales_strategy": sales_strategy,
         "seller_knowledge": seller_knowledge.model_dump(),
+        "prospect_intelligence": prospect_intelligence,
+        "business_opportunity": business_opportunity,
     }
 
     response = await client.responses.parse(

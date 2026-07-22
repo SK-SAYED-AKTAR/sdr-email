@@ -21,11 +21,9 @@ class SellerKnowledgeError(Exception):
 
 
 # This module is the only thing that reads or writes SellerKnowledge /
-# SellerDocument rows. Once Matching and Email are wired to consume real
-# seller knowledge (a later task), app.services.ai.seller_knowledge's
-# get_seller_knowledge(user_id) becomes a thin adapter over
-# get_or_create_profile() + the envelope in .knowledge_json — no other
-# service should ever import these models directly.
+# SellerDocument rows. app.services.ai.seller_knowledge.get_seller_knowledge
+# is a thin adapter over get_or_create_profile() + the envelope in
+# .knowledge_json — no other service should ever import these models directly.
 
 
 async def get_or_create_profile(db: AsyncSession, user_id: uuid.UUID) -> SellerKnowledge:

@@ -6,10 +6,10 @@ PROMPTS_DIR = Path(__file__).resolve().parents[3] / "prompts"
 # Bump the version string here whenever a prompt file's meaning changes, so
 # stored records stay traceable to the prompt that produced them.
 PROMPT_VERSIONS = {
-    "research_agent": "v1",
-    "matching_agent": "v1",
-    "email_agent": "v1",
-    "seller_intelligence": "v1",
+    "research_agent": "v2",
+    "business_opportunity_agent": "v1",
+    "email_agent": "v2",
+    "seller_intelligence": "v2",
 }
 
 

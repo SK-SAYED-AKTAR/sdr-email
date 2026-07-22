@@ -13,16 +13,22 @@ class SellerIntelligence(BaseModel):
     company_summary: str
     product_summary: str
     ideal_customer_profile: list[str]
-    target_personas: list[str]
-    industries: list[str]
-    core_features: list[str]
+    primary_industries: list[str]
     business_problems_solved: list[str]
-    value_propositions: list[str]
+    core_capabilities: list[str]
+    differentiators: list[str]
     competitive_advantages: list[str]
     pricing_position: str
-    social_proof: list[str]
+    buyer_personas: list[str]
+    cost_savings: list[str]
+    time_savings: list[str]
+    automation_opportunities: list[str]
+    customer_outcomes: list[str]
+    proof_points: list[str]
+    discovery_questions: list[str]
+    common_objections: list[str]
+    why_customers_switch: list[str]
     recommended_pitch: str
-    keywords: list[str]
     confidence: float = Field(ge=0, le=1)
 
 
@@ -33,9 +39,11 @@ async def generate_seller_intelligence(
     documents: list[tuple[str, str]],
 ) -> dict:
     """Understands the seller (our customer) from whatever sources are
-    available. Single responsibility: understanding the seller only — never
-    matching, never email copy. Returns a {data, meta} envelope ready to store
-    on SellerKnowledge.knowledge_json. No DB access; the caller persists this."""
+    available, as structured sales knowledge (ICP, problems solved, ROI
+    drivers, objections, proof points) rather than a marketing summary. Single
+    responsibility: understanding the seller only — never matching, never
+    email copy. Returns a {data, meta} envelope ready to store on
+    SellerKnowledge.knowledge_json. No DB access; the caller persists this."""
     client = get_openai_client()
 
     input_payload = {
